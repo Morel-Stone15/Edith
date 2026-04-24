@@ -26,7 +26,8 @@ jobs:
 
       - name: Build APK
         run: |
-          # Initialize and build in one go
+          mkdir -p ~/.bubblewrap
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
           bubblewrap init --manifest https://edith-66y1.onrender.com/manifest.json --no-interaction
           
           # Generate a dummy keystore
