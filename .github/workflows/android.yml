@@ -10,6 +10,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -20,10 +26,14 @@ jobs:
 
       - name: Build APK
         run: |
-          # Generate a dummy keystore for the build (In production, use secrets)
+          # Configure bubblewrap to use the installed JDK
+          mkdir -p ~/.bubblewrap
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"/usr/local/lib/android/sdk\"}" > ~/.bubblewrap/config.json
+          
+          # Generate a dummy keystore
           keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
           
-          # Build using the manifest
+          # Build
           bubblewrap build --no-interaction --ignore-signing
           
       - name: Upload APK
