@@ -26,14 +26,12 @@ jobs:
 
       - name: Build APK
         run: |
-          # Configure bubblewrap to use the installed JDK
-          mkdir -p ~/.bubblewrap
-          printf '{"jdkPath":"%s","androidSdkPath":"%s"}' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
+          # Initialize and build in one go
+          bubblewrap init --manifest https://edith-66y1.onrender.com/manifest.json --no-interaction
           
           # Generate a dummy keystore
           keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
           
-          # Build
           bubblewrap build --no-interaction --ignore-signing
           
       - name: Upload APK
