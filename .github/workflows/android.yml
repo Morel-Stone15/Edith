@@ -28,7 +28,7 @@ jobs:
         run: |
           # Configure bubblewrap to use the installed JDK
           mkdir -p ~/.bubblewrap
-          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"/usr/local/lib/android/sdk\"}" > ~/.bubblewrap/config.json
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
           
           # Generate a dummy keystore
           keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
