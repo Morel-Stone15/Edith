@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>EDITH | Connexion Système</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --secondary: #0088aa;
+      --bg: #050a14;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(0, 210, 255, 0.2);
+      --text: #f8fafc;
+      --glow: rgba(0, 210, 255, 0.4);
+      --danger: #ff4d4d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text);
+    }
+
+    #video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.4) contrast(1.2);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at center, transparent 0%, var(--bg) 90%);
+      z-index: -1;
+    }
+
+    .login-container {
+      background: var(--glass);
+      backdrop-filter: blur(25px);
+      padding: 45px 40px;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 440px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 210, 255, 0.1);
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .sphere-logo {
+      width: 70px; height: 70px;
+      background: radial-gradient(circle at 30% 30%, #40e0ff, #00d2ff);
+      border-radius: 50%;
+      margin: 0 auto 25px;
+      box-shadow: 0 0 30px var(--primary);
+      position: relative; overflow: hidden;
+    }
+    .sphere-logo::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: scanAnim 3s infinite;
+    }
+    @keyframes scanAnim { 0% { left: -100%; } 100% { left: 100%; } }
+
+    h2 { margin-bottom: 5px; font-weight: 700; letter-spacing: 4px; color: #fff; text-shadow: 0 0 15px var(--glow); }
+    .sub { font-size: 0.75rem; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 25px; opacity: 0.8; }
+
+    /* Role Toggle */
+    .role-toggle {
+      display: flex;
+      background: rgba(0,0,0,0.4);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 30px;
+      border: 1px solid var(--glass-border);
+    }
+    .role-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.4s;
+      letter-spacing: 1px;
+    }
+    .role-btn.active {
+      background: var(--primary);
+      color: #000;
+      box-shadow: 0 0 15px var(--glow);
+    }
+
+    .input-group { margin-bottom: 20px; text-align: left; }
+    label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    
+    input {
+      width: 100%;
+      padding: 14px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      color: white;
+      font-family: inherit;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      font-size: 0.95rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
+      transform: scale(1.02);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      margin-top: 10px;
+      letter-spacing: 2px;
+      transition: all 0.4s;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+    .btn:hover { 
+      background: #fff; 
+      box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      display: none;
+      animation: fadeIn 0.4s;
+    }
+    .status-msg.error { display: block; background: rgba(255, 77, 77, 0.15); border: 1px solid rgba(255, 77, 77, 0.3); color: var(--danger); }
+    .status-msg.success { display: block; background: rgba(0, 210, 255, 0.1); border: 1px solid var(--glass-border); color: var(--primary); }
+
+    .footer-link {
+      margin-top: 25px;
+      font-size: 0.85rem;
+      opacity: 0.7;
+      color: #fff;
+    }
+    .footer-link a { color: var(--primary); text-decoration: none; font-weight: 600; transition: 0.3s; }
+    .footer-link a:hover { text-shadow: 0 0 10px var(--primary); }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <video id="video-bg" autoplay muted loop>
+    <source src="../back.mp4" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+
+  <div class="login-container">
+    <div class="sphere-logo"></div>
+    <h2>EDITH</h2>
+    <p class="sub">Protocole d'authentification</p>
+
+    <!-- Role Toggle -->
+    <div class="role-toggle">
+      <button class="role-btn active" id="btn-student" onclick="switchMode('student')">🎓 Étudiant</button>
+      <button class="role-btn" id="btn-admin" onclick="switchMode('admin')">🛡️ Administrateur</button>
+    </div>
+
+    <!-- STUDENT LOGIN FORM -->
+    <form id="studentForm">
+      <div class="input-group">
+        <label>Matricule étudiant</label>
+        <input type="text" id="s-matricule" placeholder="IST-2026-XXXX" required>
+      </div>
+      <div class="input-group">
+        <label>Mot de passe</label>
+        <input type="password" id="s-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn">Connexion Étudiant</button>
+    </form>
+
+    <!-- ADMIN LOGIN FORM (Step 1) -->
+    <form id="adminForm1" class="hidden">
+      <div class="input-group">
+        <label>Identifiant administrateur</label>
+        <input type="text" id="a-username" placeholder="Votre identifiant" required>
+      </div>
+      <div class="input-group">
+        <label>Mot de passe</label>
+        <input type="password" id="a-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn">Vérifier l'identité</button>
+    </form>
+
+    <!-- ADMIN LOGIN FORM (Step 2 - Access Key) -->
+    <form id="adminForm2" class="hidden">
+      <div class="input-group">
+        <label>🔐 Clé d'accès EDITH</label>
+        <input type="password" id="a-key" placeholder="Saisissez la clé secrète" required>
+      </div>
+      <button type="submit" class="btn">Autoriser l'accès</button>
+    </form>
+
+    <div id="statusMsg" class="status-msg"></div>
+
+    <div class="footer-link" id="register-link">Pas encore de matricule ? <a href="register.html">S'inscrire</a></div>
+  </div>
+
+<script>
+  const API = '';
+  let currentMode = 'student';
+  let adminCredentials = {};
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById('btn-student').classList.toggle('active', mode === 'student');
+    document.getElementById('btn-admin').classList.toggle('active', mode === 'admin');
+    
+    document.getElementById('studentForm').classList.toggle('hidden', mode !== 'student');
+    document.getElementById('adminForm1').classList.toggle('hidden', mode !== 'admin');
+    document.getElementById('adminForm2').classList.add('hidden');
+    document.getElementById('register-link').classList.toggle('hidden', mode === 'admin');
+    clearStatus();
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + type;
+  }
+  function clearStatus() {
+    document.getElementById('statusMsg').className = 'status-msg';
+  }
+
+  // STUDENT LOGIN
+  document.getElementById('studentForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearStatus();
+
+    try {
+      const res = await fetch(API + '/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          matricule: document.getElementById('s-matricule').value,
+          password: document.getElementById('s-password').value
+        })
+      });
+      const result = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        showStatus('Accès autorisé. Redirection...', 'success');
+        setTimeout(() => { window.location.href = 'user.html'; }, 1000);
+      } else {
+        showStatus(result.error || 'Échec de connexion.', 'error');
+      }
+    } catch (err) {
+      showStatus('Serveur injoignable. Vérifiez que server.py est lancé.', 'error');
+    }
+  });
+
+  // ADMIN LOGIN - Step 1
+  document.getElementById('adminForm1').addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearStatus();
+
+    const username = document.getElementById('a-username').value;
+    const password = document.getElementById('a-password').value;
+
+    try {
+      const res = await fetch(API + '/api/login/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, step: 1 })
+      });
+      const result = await res.json();
+
+      if (res.ok && result.status === 'CREDENTIALS_VERIFIED') {
+        adminCredentials = { username, password };
+        showStatus(result.message, 'success');
+        document.getElementById('adminForm1').classList.add('hidden');
+        document.getElementById('adminForm2').classList.remove('hidden');
+      } else {
+        showStatus(result.error || 'Identité non reconnue.', 'error');
+      }
+    } catch (err) {
+      showStatus('Serveur injoignable.', 'error');
+    }
+  });
+
+  // ADMIN LOGIN - Step 2
+  document.getElementById('adminForm2').addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearStatus();
+
+    try {
+      const res = await fetch(API + '/api/login/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: adminCredentials.username,
+          password: adminCredentials.password,
+          admin_key: document.getElementById('a-key').value,
+          step: 2
+        })
+      });
+      const result = await res.json();
+
+      if (res.ok && result.status === 'ACCESS_GRANTED') {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        showStatus(result.message, 'success');
+        setTimeout(() => { window.location.href = 'admin.html'; }, 1500);
+      } else {
+        showStatus(result.error || 'Clé invalide. Accès refusé.', 'error');
+      }
+    } catch (err) {
+      showStatus('Serveur injoignable.', 'error');
+    }
+  });
+</script>
+</body>
+</html>

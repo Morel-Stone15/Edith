@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDITH | protocole d'initialisation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --accent: #3b82f6;
+            --bg: #050a14;
+            --text: #f8fafc;
+            --glow: rgba(0, 210, 255, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 70%),
+                linear-gradient(rgba(0, 210, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 210, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
+        }
+
+        #video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(0.3) contrast(1.5) saturate(0.5);
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, var(--bg) 85%);
+            z-index: 0;
+        }
+
+        .content {
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .sphere {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #face-canvas {
+            width: 200px;
+            height: 200px;
+            filter: drop-shadow(0 0 25px var(--primary));
+        }
+
+        .ring {
+            position: absolute;
+            top: -15%;
+            left: -15%;
+            width: 130%;
+            height: 130%;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 50%;
+            animation: rotate 12s linear infinite;
+        }
+
+        .ring:nth-child(2) {
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            border-color: rgba(59, 130, 246, 0.15);
+            animation-duration: 20s;
+            animation-direction: reverse;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            box-shadow: 0 0 15px var(--primary);
+            top: 0;
+            left: 0;
+            z-index: 5;
+            animation: scan 4s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.5;
+            }
+
+            90% {
+                opacity: 0.5;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 600;
+            letter-spacing: 1rem;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 20px var(--glow);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s forwards 0.5s;
+        }
+
+        .status {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            letter-spacing: 2px;
+            opacity: 0;
+            animation: fadeInUp 1s forwards 1s;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-bar {
+            width: 250px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            box-shadow: 0 0 15px var(--primary);
+            animation: fillProgress 4s forwards 1s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        @keyframes fillProgress {
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <video id="video-bg" autoplay muted loop>
+        <source src="welcom.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+
+    <div class="content">
+        <div class="logo-container">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="scan-line"></div>
+            <div class="sphere" id="face-container">
+                <canvas id="face-canvas"></canvas>
+            </div>
+        </div>
+        <h1 class="title">EDITH</h1>
+        <div class="status" id="status-text">INITIALIZING SYSTEMS...</div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+
+    <script>
+        const statusText = document.getElementById('status-text');
+        const video = document.getElementById('video-bg');
+
+        const statuses = [
+            "Connexion au systeme...",
+            "construction du code source...",
+            "Authentification de Edith...",
+            "Synchronisation des donnees...",
+            "Bienvenue."
+        ];
+
+        let index = 0;
+        const interval = setInterval(() => {
+            if (index < statuses.length) {
+                statusText.textContent = statuses[index];
+                index++;
+            } else {
+                clearInterval(interval);
+                setTimeout(() => {
+                    statusText.innerHTML = '<a href="/login" style="color: var(--primary); text-decoration: none; border: 1px solid var(--primary); padding: 8px 30px; border-radius: 25px; transition: all 0.3s; box-shadow: 0 0 15px var(--glow);" onmouseover="this.style.background=\'rgba(0,210,255,0.1)\'" onmouseout="this.style.background=\'none\'">COMMENCER</a>';
+                    setTimeout(() => {
+                        window.location.href = "/chat";
+                    }, 3000);
+                }, 1000);
+            }
+        }, 800);
+
+        video.onplay = () => {
+            video.style.opacity = "1";
+        };
+
+        // --- THREE.JS FACE INITIALIZATION ---
+        function initFace() {
+            const container = document.getElementById('face-container');
+            const canvas = document.getElementById('face-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+            renderer.setSize(200, 200, false);
+
+            // Head Shape (Scaled Sphere)
+            const geometry = new THREE.SphereGeometry(1.2, 32, 32);
+            const wireframe = new THREE.WireframeGeometry(geometry);
+            const material = new THREE.LineBasicMaterial({
+                color: 0x00d2ff,
+                transparent: true,
+                opacity: 0.5
+            });
+            const head = new THREE.LineSegments(wireframe, material);
+            head.scale.set(1, 1.4, 1.1); // Elongated head shape
+            scene.add(head);
+
+            // Inner Core
+            const coreGeom = new THREE.IcosahedronGeometry(0.7, 2);
+            const coreMat = new THREE.MeshBasicMaterial({
+                color: 0x00d2ff,
+                transparent: true,
+                opacity: 0.1
+            });
+            const core = new THREE.Mesh(coreGeom, coreMat);
+            scene.add(core);
+
+            // Sparkles / Data Points
+            const pointsGeom = new THREE.BufferGeometry();
+            const pointsCount = 60;
+            const positions = new Float32Array(pointsCount * 3);
+            for (let i = 0; i < pointsCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 2.5;
+            }
+            pointsGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const pointsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.04, transparent: true, opacity: 0.6 });
+            const points = new THREE.Points(pointsGeom, pointsMat);
+            scene.add(points);
+
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                head.rotation.y += 0.005;
+                head.rotation.x = Math.sin(Date.now() * 0.001) * 0.1;
+                core.rotation.y -= 0.01;
+                points.rotation.y += 0.002;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        initFace();
+    </script>
+</body>
+
+</html>

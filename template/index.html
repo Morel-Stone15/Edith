@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <title>EDITH | Intelligence Artificielle IST</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="EDITH">
+  <link rel="apple-touch-icon" href="/icon-512.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#050a14">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-laserwave.min.css" />
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --secondary: #0088aa;
+      --accent: #3b82f6;
+      --bg: #050a14;
+      --glass: rgba(15, 23, 42, 0.8);
+      --glass-border: rgba(0, 210, 255, 0.2);
+      --text: #f8fafc;
+      --glow: rgba(0, 210, 255, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(rgba(5, 10, 20, 0.7), rgba(5, 10, 20, 0.7)), url('/template/tsap.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .edith-mini-sphere {
+      width: 50px;
+      height: 50px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    #face-canvas {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px var(--primary));
+    }
+
+    .info h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 10px var(--glow);
+    }
+
+    .info p {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      color: var(--primary);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) transparent;
+    }
+
+    .msg {
+      max-width: 80%;
+      padding: 1.2rem 1.6rem;
+      border-radius: 18px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      position: relative;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .msg.me {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #000;
+      font-weight: 500;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 8px 25px rgba(0, 210, 255, 0.3);
+    }
+
+    .msg.bot {
+      align-self: flex-start;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 5px;
+      padding: 10px 0;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+      animation: dotPulse 1.5s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dotPulse {
+
+      0%,
+      100% {
+        opacity: 0.2;
+        transform: scale(0.7);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    /* Markdown Styles */
+    .msg.bot p {
+      margin-bottom: 0.8rem;
+    }
+
+    .msg.bot p:last-child {
+      margin-bottom: 0;
+    }
+
+    .msg.bot pre {
+      background: #0b1120;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      overflow-x: auto;
+      border: 1px solid rgba(0, 210, 255, 0.2);
+    }
+
+    .msg.bot code {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+      background: rgba(0, 210, 255, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #00d2ff;
+    }
+
+    .msg.bot pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.95em;
+    }
+
+    .msg.bot ul,
+    .msg.bot ol {
+      margin: 0.5rem 0 1rem 2rem;
+    }
+
+    .msg.bot a {
+      color: var(--primary);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--primary);
+    }
+
+    .msg.bot a:hover {
+      color: #fff;
+      border-bottom-style: solid;
+    }
+
+    .msg.bot h1,
+    .msg.bot h2,
+    .msg.bot h3,
+    .msg.bot h4 {
+      margin: 1.5rem 0 0.8rem 0;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .msg.bot h1 {
+      font-size: 1.4em;
+    }
+
+    .msg.bot h2 {
+      font-size: 1.25em;
+    }
+
+    .msg.bot h3 {
+      font-size: 1.1em;
+    }
+
+    .msg.bot blockquote {
+      border-left: 3px solid var(--primary);
+      padding-left: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin: 1rem 0;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.5rem 1rem;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .msg.bot table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9em;
+    }
+
+    .msg.bot th,
+    .msg.bot td {
+      border: 1px solid var(--glass-border);
+      padding: 0.6rem;
+      text-align: left;
+    }
+
+    .msg.bot th {
+      background: rgba(0, 210, 255, 0.1);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .input-container {
+      padding: 1.5rem 2rem 2.5rem;
+      background: transparent;
+    }
+
+    .input-bar {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      padding: 10px 10px 10px 25px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      border-radius: 35px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .input-bar:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 10px 40px rgba(0, 210, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    #input {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      background: transparent;
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+    }
+
+    #input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    #input:focus {
+      outline: none;
+    }
+
+    .action-btn {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      background: transparent;
+      color: var(--primary);
+    }
+
+    #send {
+      background: var(--primary);
+      color: #000;
+    }
+
+    #send:hover {
+      background: #fff;
+      transform: scale(1.1) rotate(-10deg);
+    }
+
+    #speak-button {
+      background: rgba(0, 210, 255, 0.1);
+    }
+
+    #speak-button:hover {
+      background: var(--primary);
+      color: #000;
+      transform: scale(1.1);
+    }
+
+    /* Menu Hamburger */
+    .menu-trigger {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 12px;
+      transition: all 0.3s;
+      color: var(--primary);
+    }
+
+    .menu-trigger:hover {
+      background: rgba(0, 210, 255, 0.15);
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+    }
+
+    #menu {
+      display: none;
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      background: var(--glass);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      width: 280px;
+      padding: 15px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      animation: menuFade 0.3s ease-out;
+    }
+
+    @keyframes menuFade {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #menu a {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 14px 18px;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    #menu a:hover {
+      background: rgba(0, 210, 255, 0.15);
+      color: var(--primary);
+      padding-left: 22px;
+    }
+
+    #menu .divider {
+      height: 1px;
+      background: var(--glass-border);
+      margin: 10px 0;
+    }
+
+    /* Wiki Source Badge */
+    .wiki-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      font-size: 0.7rem;
+      color: #fff;
+      text-decoration: none !important;
+      margin-top: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+
+    .wiki-badge:hover {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .wiki-badge i {
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      <div class="edith-mini-sphere" id="face-container">
+        <canvas id="face-canvas"></canvas>
+      </div>
+      <div class="info">
+        <h2>EDITH</h2>
+        <p>IST C-Tech Core</p>
+      </div>
+    </div>
+
+    <div class="menu-trigger" id="hamburger">
+      <i class="ph-bold ph-list" style="font-size: 24px;"></i>
+    </div>
+
+    <div id="menu">
+      <a href="/template/login.html"><i class="ph ph-user"></i> Espace Étudiant</a>
+      <a href="/template/login.html"><i class="ph ph-shield-check"></i> Administration</a>
+      <div class="divider"></div>
+      <a id="link-logout" href="#"><i class="ph ph-sign-out"></i> Déconnexion</a>
+    </div>
+  </header>
+
+  <div id="messages">
+    <div class="msg bot">
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Initialisation terminée.</h1>
+      <p>Bonjour, je suis <strong>EDITH</strong>, l’intelligence artificielle autonome de l’Institut Supérieur de
+        Technologie.</p>
+      <p style="margin-top: 0.5rem;">Je suis connectée aux serveurs du club C-Tech. Comment puis-je vous assister
+        aujourd’hui ?</p>
+    </div>
+  </div>
+
+  <div class="input-container">
+    <div class="input-bar">
+      <input type="text" id="input" placeholder="Demandez n'importe quoi à EDITH..." autocomplete="off">
+      <button class="action-btn" id="wiki-search" title="Recherche Wikipedia Directe"><i
+          class="ph-bold ph-magnifying-glass" style="font-size:20px;"></i></button>
+      <button class="action-btn" id="speak-button" title="Écouter"><i class="ph-bold ph-speaker-high"
+          style="font-size:20px;"></i></button>
+      <button class="action-btn" id="send" title="Envoyer"><i class="ph-bold ph-paper-plane-right"
+          style="font-size:20px;"></i></button>
+    </div>
+  </div>
+
+  <script>
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const speakBtn = document.getElementById('speak-button');
+    const wikiBtn = document.getElementById('wiki-search');
+    const hamburger = document.getElementById('hamburger');
+    const menu = document.getElementById('menu');
+
+    let chatHistory = [];
+
+    function addMessage(text, who = 'bot', isTyping = false) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + (who === 'me' ? 'me' : 'bot');
+
+      if (isTyping) {
+        div.innerHTML = `<div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+      } else {
+        div.textContent = text;
+      }
+
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    async function sendMessage(text) {
+      addMessage(text, 'me');
+      chatHistory.push({ role: 'user', content: text });
+
+      const typingDiv = addMessage("", 'bot', true);
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify({ message: text, history: chatHistory.slice(-6) })
+        });
+
+        const textData = await response.text();
+        let data;
+        try {
+          data = JSON.parse(textData);
+        } catch (parseErr) {
+          throw new Error(`Serveur a répondu avec un format invalide (Status: ${response.status}). Contenu: ${textData.substring(0, 50)}`);
+        }
+
+        if (!response.ok) {
+          typingDiv.innerHTML = `<p style="color: #ef4444;">Erreur critique: ${DOMPurify.sanitize(data?.reply || "Déconnexion du module central.")}</p>`;
+          return;
+        }
+
+        const reply = data.reply;
+
+        // Parse that sweet Markdown
+        const rawHTML = marked.parse(reply, {
+          breaks: true,
+          gfm: true
+        });
+        const cleanHTML = DOMPurify.sanitize(rawHTML);
+
+        typingDiv.innerHTML = cleanHTML;
+
+        // Show Wikipedia Source if present
+        if (data.wiki_source) {
+          const badge = document.createElement('a');
+          badge.href = data.wiki_source;
+          badge.target = "_blank";
+          badge.className = 'wiki-badge';
+          badge.innerHTML = `<i class="ph-fill ph-wikipedia-logo"></i> Source Wikipedia`;
+          typingDiv.appendChild(badge);
+        }
+
+        // Let Prism do its magic for any code blocks
+        if (window.Prism) {
+          Prism.highlightAllUnder(typingDiv);
+        }
+
+        messages.scrollTop = messages.scrollHeight;
+        chatHistory.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        console.error("Chat Error:", err);
+        typingDiv.innerHTML = `<p style='color: #ef4444;'>Impossible de traiter la demande. Erreur: ${err.message || 'Serveur injoignable.'}</p>`;
+      }
+    }
+
+    sendBtn.addEventListener('click', () => {
+      const v = input.value.trim();
+      if (!v) return;
+      sendMessage(v);
+      input.value = '';
+    });
+
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') sendBtn.click(); });
+
+    // Wiki Direct Search
+    wikiBtn.addEventListener('click', () => {
+      const v = input.value.trim();
+      if (!v) {
+        input.placeholder = "Tapez un sujet académique ici...";
+        input.focus();
+        return;
+      }
+      sendMessage(`Recherche Wikipedia sur ${v}`);
+      input.value = '';
+    });
+
+    // Voice
+    speakBtn.addEventListener('click', () => {
+      const bots = document.querySelectorAll('.msg.bot');
+      if (!bots.length) return;
+      const text = bots[bots.length - 1].textContent;
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      utterance.rate = 1.1;
+      speechSynthesis.speak(utterance);
+    });
+
+    // Menu
+    hamburger.addEventListener('click', (e) => {
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      e.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+      menu.style.display = 'none';
+    });
+
+    // Logout
+    document.getElementById('link-logout').addEventListener('click', (e) => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    });
+
+    // --- THREE.JS FACE INITIALIZATION ---
+    function initFace() {
+      const container = document.getElementById('face-container');
+      const canvas = document.getElementById('face-canvas');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+      const rect = container.getBoundingClientRect();
+      renderer.setSize(rect.width * 2, rect.height * 2, false); // Retina resolution
+
+      // Head Shape (Scaled Sphere)
+      const geometry = new THREE.SphereGeometry(1.2, 32, 32);
+      const wireframe = new THREE.WireframeGeometry(geometry);
+      const material = new THREE.LineBasicMaterial({
+        color: 0x00d2ff,
+        transparent: true,
+        opacity: 0.5
+      });
+      const head = new THREE.LineSegments(wireframe, material);
+      head.scale.set(1, 1.4, 1.1); // Elongated head shape
+      scene.add(head);
+
+      // Inner Core Glow
+      const coreGeom = new THREE.IcosahedronGeometry(0.7, 2);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0x00d2ff,
+        transparent: true,
+        opacity: 0.1
+      });
+      const core = new THREE.Mesh(coreGeom, coreMat);
+      scene.add(core);
+
+      // Sparkles (Points)
+      const pointsGeom = new THREE.BufferGeometry();
+      const pointsCount = 40;
+      const positions = new Float32Array(pointsCount * 3);
+      for (let i = 0; i < pointsCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 2.5;
+      }
+      pointsGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const pointsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.04, transparent: true, opacity: 0.6 });
+      const points = new THREE.Points(pointsGeom, pointsMat);
+      scene.add(points);
+
+      camera.position.z = 3;
+
+      let mouseX = 0, mouseY = 0;
+      document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      let targetRotationX = 0;
+      let targetRotationY = 0;
+      let pulseValue = 1.0;
+      let pulseDir = 1;
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Mouse follow
+        targetRotationY = mouseX * 0.4;
+        targetRotationX = -mouseY * 0.2;
+
+        head.rotation.y += (targetRotationY - head.rotation.y) * 0.05;
+        head.rotation.x += (targetRotationX - head.rotation.x) * 0.05;
+        core.rotation.y -= 0.01;
+        points.rotation.y += 0.005;
+
+        // Auto constant rotation
+        head.rotation.y += 0.002;
+
+        // Pulsing based on state
+        const isSpeaking = window.speechSynthesis.speaking;
+        const isTyping = document.querySelectorAll('.typing-indicator').length > 0;
+
+        if (isSpeaking || isTyping) {
+          pulseValue += 0.04 * pulseDir;
+          if (pulseValue > 1.25) pulseDir = -1;
+          if (pulseValue < 0.95) pulseDir = 1;
+          head.scale.set(pulseValue * 1, pulseValue * 1.4, pulseValue * 1.1);
+          material.opacity = 0.8;
+          material.color.setHex(0x00d2ff);
+        } else {
+          pulseValue += (1.0 - pulseValue) * 0.1;
+          head.scale.set(pulseValue * 1, pulseValue * 1.4, pulseValue * 1.1);
+          material.opacity = 0.5;
+          material.color.setHex(0x00d2ff);
+        }
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+    initFace();
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('EDITH Service Worker Registered'))
+          .catch(err => console.log('EDITH SW Register Failed', err));
+      });
+    }
+  </script>
+</body>
+
+</html>

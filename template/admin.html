@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>EDITH | Administration Core</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --secondary: #0088aa;
+      --bg: #050a14;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(0, 210, 255, 0.2);
+      --text: #f8fafc;
+      --glow: rgba(0, 210, 255, 0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.3) contrast(1.2);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at top right, rgba(0, 210, 255, 0.1), transparent 70%);
+      z-index: -1;
+    }
+
+    header {
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
+    .brand i { filter: drop-shadow(0 0 5px var(--glow)); }
+
+    main { padding: 40px 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(25px);
+      padding: 35px;
+      border-radius: 28px;
+      border: 1px solid var(--glass-border);
+      margin-bottom: 30px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+
+    h2 { margin-bottom: 30px; font-weight: 700; font-size: 1.3rem; display: flex; align-items: center; gap: 15px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+    .upload-zone { 
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px dashed var(--glass-border); 
+      border-radius: 20px; 
+      padding: 40px; 
+      text-align: center; 
+      transition: all 0.4s; 
+    }
+    .upload-zone:hover { border-color: var(--primary); background: rgba(0, 210, 255, 0.05); }
+
+    .btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.4s;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 210, 255, 0.3); }
+
+    select, input[type="file"] {
+      width: 100%;
+      padding: 14px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: white;
+      margin-bottom: 25px;
+      font-family: inherit;
+    }
+    select:focus { border-color: var(--primary); outline: none; }
+
+    .history-card { max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+
+    .doc-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 18px;
+      background: rgba(0, 210, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      margin-bottom: 12px;
+      transition: all 0.3s;
+    }
+    .doc-row:hover { border-color: var(--primary); background: rgba(0, 210, 255, 0.08); }
+
+    .stat-box {
+      padding: 20px;
+      background: rgba(0, 210, 255, 0.05);
+      border-radius: 18px;
+      border: 1px solid var(--glass-border);
+      margin-bottom: 20px;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 5px; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <video id="video-bg" autoplay muted loop>
+    <source src="../back.mp4" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+
+  <header>
+    <div class="brand"><i class="ph-bold ph-shield-chevron" style="font-size: 28px;"></i> EDITH CORE ADMIN</div>
+    <a href="/" style="color: #fff; text-decoration: none; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+      <i class="ph-bold ph-house"></i> Quitter le Terminal
+    </a>
+  </header>
+
+  <main>
+    <div class="grid">
+      <div class="left-col">
+        <div class="card">
+          <h2><i class="ph-bold ph-broadcast"></i> Diffusion Tactique</h2>
+          <form id="uploadForm">
+            <label style="display: block; margin-bottom: 12px; font-size: 0.85rem; color: var(--primary); font-weight: 600; text-transform: uppercase;">Classe de destination</label>
+            <select id="targetClass" required>
+              <option value="all">Faisceau Global (Toutes les classes)</option>
+              <option>Licence 1</option>
+              <option>Licence 2</option>
+              <option>Licence 3</option>
+              <option>Master 1</option>
+              <option>Master 2</option>
+            </select>
+
+            <label style="display: block; margin-bottom: 12px; font-size: 0.85rem; color: var(--primary); font-weight: 600; text-transform: uppercase;">Flux de données (PDF, IMG...)</label>
+            <input type="file" id="fileInput" required>
+
+            <button type="submit" class="btn">PROJETER LE DOCUMENT</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2><i class="ph-bold ph-activity"></i> Archive des Transmissions</h2>
+          <div id="historyList" class="history-card">
+            <p style="opacity: 0.5; font-style: italic; text-align: center;">Accès aux archives en cours...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <h2><i class="ph-bold ph-chart-bar"></i> État du Noyau</h2>
+          <div class="stat-box">
+            <div class="stat-label">Utilisateurs Actifs</div>
+            <div class="stat-value">128</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Données Archivées</div>
+            <div class="stat-value">2.4 GB</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Requêtes IA / Jour</div>
+            <div class="stat-value">1,402</div>
+          </div>
+          <div style="text-align: center; margin-top: 20px;">
+            <div style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">ENERGIE SYSTÈME: 100%</div>
+            <div style="height: 4px; background: rgba(0, 210, 255, 0.2); border-radius: 2px; margin-top: 8px; overflow: hidden;">
+              <div style="width: 100%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+    if (!user.fullname || !token) { window.location.href = "login.html"; return; }
+
+    const uploadForm = document.getElementById('uploadForm');
+    
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('fileInput');
+      const targetClass = document.getElementById('targetClass').value;
+      
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('uploader', user.fullname);
+      formData.append('targetClass', targetClass);
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+        if (res.ok) {
+          alert("✅ Document diffusé avec succès.");
+          fileInput.value = "";
+          loadHistory();
+        }
+      } catch (err) {
+        alert("❌ Erreur d'upload.");
+      }
+    });
+
+    async function loadHistory() {
+      const historyList = document.getElementById('historyList');
+      // On récupère ici tous les docs (on pourrait créer un endpoint admin dédié)
+      try {
+        const res = await fetch('/api/documents/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const docs = await res.json();
+        historyList.innerHTML = docs.length ? docs.map(d => `
+          <div class="doc-row">
+            <span><strong>${d.classe}</strong>: ${d.filename}</span>
+            <span style="opacity: 0.5;">${d.uploaded_by}</span>
+          </div>
+        `).join('') : '<p style="opacity: 0.5;">Aucun document envoyé.</p>';
+      } catch(e) { historyList.innerHTML = "Erreur historique."; }
+    }
+
+    loadHistory();
+  });
+</script>
+</body>
+</html>

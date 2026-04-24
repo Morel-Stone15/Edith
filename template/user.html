@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>EDITH | Espace Étudiant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --secondary: #0088aa;
+      --bg: #050a14;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(0, 210, 255, 0.2);
+      --text: #f8fafc;
+      --glow: rgba(0, 210, 255, 0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.3) contrast(1.1);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      z-index: -1;
+    }
+
+    header {
+      background: var(--glass);
+      backdrop-filter: blur(15px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .user-info { display: flex; align-items: center; gap: 15px; }
+    .avatar-circle {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      box-shadow: 0 0 15px var(--glow);
+      color: #000;
+    }
+
+    nav { display: flex; gap: 25px; }
+    nav a { color: #fff; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+    nav a:hover { color: var(--primary); text-shadow: 0 0 10px var(--glow); }
+
+    main { padding: 40px 2rem; max-width: 1200px; margin: 0 auto; }
+
+    .welcome-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      padding: 40px;
+      border-radius: 28px;
+      border: 1px solid var(--glass-border);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-card::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(0, 210, 255, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+
+    .section-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 24px;
+      border: 1px solid var(--glass-border);
+    }
+
+    h3 { margin-bottom: 25px; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 12px; letter-spacing: 1px; text-transform: uppercase; font-size: 1.1rem; }
+
+    .doc-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .doc-item:hover { 
+      border-color: var(--primary); 
+      background: rgba(0, 210, 255, 0.08); 
+      transform: translateX(10px);
+      box-shadow: -5px 0 15px rgba(0, 210, 255, 0.2);
+    }
+
+    .doc-info { display: flex; align-items: center; gap: 15px; }
+    .doc-icon { font-size: 1.8rem; color: var(--primary); filter: drop-shadow(0 0 5px var(--glow)); }
+
+    .download-btn {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 15px;
+      background: rgba(0, 210, 255, 0.1);
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    .download-btn:hover { background: var(--primary); color: #000; }
+
+    .fact-card {
+      margin-top: 25px;
+      padding: 20px;
+      background: rgba(0, 210, 255, 0.05);
+      border-radius: 18px;
+      border-left: 4px solid var(--primary);
+    }
+    .fact-title { font-weight: 700; font-size: 0.9rem; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
+    .fact-content { font-size: 0.85rem; line-height: 1.5; opacity: 0.8; }
+
+    .empty-state { opacity: 0.5; font-style: italic; text-align: center; padding: 40px; }
+
+    #logout-btn { color: #ff4d4d; cursor: pointer; font-weight: 600; }
+    #logout-btn:hover { color: #ff1a1a; text-shadow: 0 0 10px rgba(255, 77, 77, 0.4); }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <video id="video-bg" autoplay muted loop>
+    <source src="../back.mp4" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+
+  <header>
+    <div class="user-info">
+      <div class="avatar-circle" id="userInitial">?</div>
+      <div>
+        <div id="studentName" style="font-weight: 600; font-size: 1.1rem; color: #fff;">Chargement...</div>
+        <div id="studentMatricule" style="font-size: 0.75rem; opacity: 0.6; letter-spacing: 1px;">...</div>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html"><i class="ph-bold ph-chat-circle"></i> Chat EDITH</a>
+      <a id="logout-btn"><i class="ph-bold ph-power"></i> Déconnexion</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="welcome-card">
+      <h2 style="font-size: 2.2rem; margin-bottom: 5px; font-weight: 700; color: #fff;">Ravi de vous revoir.</h2>
+      <p style="opacity: 0.7; font-size: 1rem;">Flux de données synchronisé pour la classe <span id="currentClasse" style="color: var(--primary); font-weight: 600; text-shadow: 0 0 10px var(--glow);">...</span></p>
+    </div>
+
+    <div class="grid">
+      <div class="section-card">
+        <h3><i class="ph-bold ph-folder-open"></i> Ma Bibliothèque Numérique</h3>
+        <div id="docsList">
+          <div class="empty-state">Initialisation des protocoles d'accès...</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3><i class="ph-bold ph-lightning"></i> Infos Système</h3>
+        <div style="padding: 20px; background: rgba(0, 210, 255, 0.08); border-radius: 18px; border: 1px solid var(--glass-border); margin-bottom: 25px;">
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary); letter-spacing: 1px; margin-bottom: 5px;">STATUT EDITH</div>
+          <div style="font-size: 0.85rem; color: #fff;">Tous les systèmes sont opérationnels. Noyau stable à 100%.</div>
+        </div>
+
+        <div class="fact-card">
+          <div class="fact-title">💡 Le Saviez-Vous ? (Par EDITH)</div>
+          <div id="wiki-fact" class="fact-content">Chargement des données culturelles...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  if (!token || !user.fullname) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  // UI Init
+  document.getElementById('studentName').textContent = user.fullname;
+  document.getElementById('studentMatricule').textContent = user.matricule;
+  document.getElementById('currentClasse').textContent = user.classe;
+  document.getElementById('userInitial').textContent = user.fullname.charAt(0).toUpperCase();
+
+  async function loadDocuments() {
+    const docsList = document.getElementById('docsList');
+    try {
+      const res = await fetch(`/api/documents/${encodeURIComponent(user.classe)}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const docs = await res.json();
+
+      if (docs.length === 0) {
+        docsList.innerHTML = '<div class="empty-state">Aucun document disponible pour votre classe actuellement.</div>';
+        return;
+      }
+
+      docsList.innerHTML = docs.map(d => `
+        <div class="doc-item">
+          <div class="doc-info">
+            <i class="ph ph-file-pdf doc-icon"></i>
+            <div>
+              <div style="font-weight: 500;">${d.filename}</div>
+              <div style="font-size: 0.75rem; opacity: 0.5;">Par ${d.uploaded_by}</div>
+            </div>
+          </div>
+          <a href="/${d.filepath}" download class="download-btn">
+            <i class="ph ph-download-simple"></i> Télécharger
+          </a>
+        </div>
+      `).join('');
+    } catch (err) {
+      docsList.innerHTML = '<div class="empty-state">Erreur lors du chargement des documents.</div>';
+    }
+  }
+
+  async function loadFact() {
+    const factDiv = document.getElementById('wiki-fact');
+    const subjects = ["Intelligence artificielle", "Physique quantique", "Histoire du Gabon", "Algorithmique", "Système d'exploitation", "Réseau informatique", "Cryptographie"];
+    const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+    
+    try {
+      const res = await fetch(`/api/wiki?q=${encodeURIComponent(randomSubject)}`);
+      const data = await res.json();
+      if (data.found) {
+        factDiv.innerHTML = `<strong>${data.title}</strong>: ${data.summary.substring(0, 200)}... <br><a href="${data.url}" target="_blank" style="color:var(--primary); font-size:0.75rem; text-decoration:none;">Lire la suite →</a>`;
+      }
+    } catch (e) {
+      factDiv.textContent = "Système de culture générale hors ligne.";
+    }
+  }
+
+  loadDocuments();
+  loadFact();
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.clear();
+    window.location.href = "/";
+  });
+});
+</script>
+</body>
+</html>
+

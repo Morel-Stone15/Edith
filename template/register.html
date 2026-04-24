@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>EDITH | Inscription Sécurisée</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00d2ff;
+      --secondary: #0088aa;
+      --bg: #050a14;
+      --glass: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(0, 210, 255, 0.2);
+      --text: #f8fafc;
+      --glow: rgba(0, 210, 255, 0.4);
+      --danger: #ff4d4d;
+      --success: #00ffaa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.4) contrast(1.2);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle at center, transparent 0%, var(--bg) 90%);
+      z-index: -1;
+    }
+
+    .form-container {
+      background: var(--glass);
+      backdrop-filter: blur(25px);
+      padding: 45px 40px;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 210, 255, 0.1);
+      animation: fadeIn 0.8s ease-out;
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 { 
+      text-align: center; 
+      margin-bottom: 5px; 
+      font-weight: 700; 
+      letter-spacing: 4px; 
+      color: #fff; 
+      text-shadow: 0 0 15px var(--glow); 
+    }
+    .sub { text-align: center; font-size: 0.75rem; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; opacity: 0.8; }
+
+    .input-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--primary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    
+    input, select {
+      width: 100%;
+      padding: 14px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      color: white;
+      font-family: inherit;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      font-size: 0.95rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    select option { background: #050a14; color: #fff; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      margin-top: 10px;
+      letter-spacing: 2px;
+      transition: all 0.4s;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+    .btn:hover { 
+      background: #fff; 
+      box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      display: none;
+      animation: fadeIn 0.4s;
+      text-align: center;
+    }
+    .status-msg.error { display: block; background: rgba(255, 77, 77, 0.15); border: 1px solid rgba(255, 77, 77, 0.3); color: var(--danger); }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 0.85rem;
+      opacity: 0.7;
+      color: #fff;
+    }
+    .footer-link a { color: var(--primary); text-decoration: none; font-weight: 600; transition: 0.3s; }
+    .footer-link a:hover { text-shadow: 0 0 10px var(--primary); }
+
+    @media (max-width: 500px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* Success Modal */
+    #successModal {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 10, 20, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 28px;
+      z-index: 10;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+      animation: fadeIn 0.5s;
+    }
+    #successModal h3 { color: var(--success); margin-bottom: 15px; font-size: 1.5rem; }
+    #successModal p { margin-bottom: 20px; font-size: 0.9rem; color: #ccc; }
+    .matricule-display {
+      background: rgba(0, 255, 170, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+      font-size: 1.8rem;
+      font-weight: 700;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 30px;
+      letter-spacing: 3px;
+      box-shadow: 0 0 20px rgba(0, 255, 170, 0.2);
+    }
+    .btn-success {
+      background: var(--success);
+      color: #000;
+    }
+    .btn-success:hover {
+      background: #fff;
+      box-shadow: 0 0 30px rgba(0, 255, 170, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <video id="video-bg" autoplay muted loop>
+    <source src="../back.mp4" type="video/mp4">
+  </video>
+  <div class="overlay"></div>
+
+  <div class="form-container">
+    <div id="registerView">
+      <h2>INITIALISER PROFIL</h2>
+      <p class="sub">Création du compte étudiant</p>
+      <form id="registerForm">
+        <div class="input-group">
+          <label>Identifiant utilisateur (PSEUDO)</label>
+          <input type="text" id="username" placeholder="ex: morel_stone" required>
+        </div>
+
+        <div class="input-group">
+          <label>Nom complet</label>
+          <input type="text" id="fullname" placeholder="Nom et Prénom" required>
+        </div>
+
+        <div class="grid">
+          <div class="input-group">
+            <label>Niveau / Classe</label>
+            <select id="classe" required>
+              <option value="Licence 1">Licence 1</option>
+              <option value="Licence 2">Licence 2</option>
+              <option value="Licence 3">Licence 3</option>
+              <option value="Master 1">Master 1</option>
+              <option value="Master 2">Master 2</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Mot de passe</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <div id="statusMsg" class="status-msg"></div>
+
+        <button type="submit" class="btn" id="submitBtn">Créer mon dossier étudiant</button>
+      </form>
+      <div class="footer-link">Déjà enregistré ? <a href="login.html">Se connecter</a></div>
+    </div>
+
+    <!-- Modal Success -->
+    <div id="successModal">
+      <h3>INSCRIPTION VALIDÉE</h3>
+      <p>Votre profil a été créé dans la base de données de l'IST. Voici votre matricule officiel étudiant. <strong>Veuillez le noter précieusement, il est requis pour vous connecter.</strong></p>
+      <div class="matricule-display" id="generatedMatricule">IST-2026-0000</div>
+      <button class="btn btn-success" onclick="goToLogin()">Accéder au portail de connexion</button>
+    </div>
+
+  </div>
+
+<script>
+const API = '';
+
+function showStatus(msg) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = 'status-msg error';
+}
+
+function clearStatus() {
+  document.getElementById('statusMsg').className = 'status-msg';
+}
+
+function goToLogin() {
+  window.location.href = "login.html";
+}
+
+document.getElementById('registerForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  clearStatus();
+  
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = "TRAITEMENT...";
+  btn.disabled = true;
+
+  const data = {
+    username: document.getElementById('username').value,
+    password: document.getElementById('password').value,
+    fullname: document.getElementById('fullname').value,
+    classe: document.getElementById('classe').value,
+    role: "user" // Force user role for registration
+  };
+
+  try {
+    const res = await fetch(API + '/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    
+    if (res.ok) {
+      document.getElementById('generatedMatricule').textContent = result.matricule;
+      document.getElementById('registerView').style.display = 'none';
+      const modal = document.getElementById('successModal');
+      modal.style.display = 'flex';
+    } else {
+      showStatus(result.error || "Une erreur est survenue.");
+      btn.textContent = "Créer mon dossier étudiant";
+      btn.disabled = false;
+    }
+  } catch (err) {
+    showStatus("Impossible de contacter le serveur. Le serveur Python est-il lancé ?");
+    btn.textContent = "Créer mon dossier étudiant";
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
