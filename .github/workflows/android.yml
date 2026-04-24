@@ -24,11 +24,14 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
+      - name: Wake up Render Server
+        run: curl -s https://edith-66y1.onrender.com/manifest.json > /dev/null
+
       - name: Build APK
         run: |
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
-          bubblewrap init --manifest https://edith-66y1.onrender.com/manifest.json --no-interaction
+          bubblewrap init --manifest manifest.json --no-interaction
           
           # Generate a dummy keystore
           keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
