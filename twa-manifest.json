@@ -1,0 +1,19 @@
+{
+  "packageId": "com.edith.istctech",
+  "host": "edith-66y1.onrender.com",
+  "name": "EDITH C-Tech",
+  "launcherName": "EDITH",
+  "display": "standalone",
+  "themeColor": "#050a14",
+  "navigationColor": "#050a14",
+  "backgroundColor": "#050a14",
+  "enableNotifications": true,
+  "startUrl": "/chat",
+  "iconUrl": "https://edith-66y1.onrender.com/icon-512.png",
+  "maskableIconUrl": "https://edith-66y1.onrender.com/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./edith.keystore",
+    "alias": "edith"
+  }
+}

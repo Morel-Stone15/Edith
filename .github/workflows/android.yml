@@ -1,0 +1,33 @@
+name: Build Android APK
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Build APK
+        run: |
+          # Generate a dummy keystore for the build (In production, use secrets)
+          keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
+          
+          # Build using the manifest
+          bubblewrap build --no-interaction --ignore-signing
+          
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: EDITH-Android-App
+          path: ./*.apk

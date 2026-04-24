@@ -646,6 +646,10 @@ def serve_manifest():
 def serve_sw():
     return send_from_directory('.', 'sw.js')
 
+@app.route('/.well-known/assetlinks.json')
+def serve_assetlinks():
+    return send_from_directory('.', 'assetlinks.json')
+
 # Catch-all for other static assets (JS, CSS, fonts, videos)
 # IMPORTANT: This must NEVER match /api/* routes
 @app.route('/<path:path>')
