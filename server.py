@@ -679,7 +679,8 @@ def server_error(e):
 
 if __name__ == '__main__':
     local_ip = get_local_ip()
+    port = int(os.environ.get("PORT", 3000))
     print(f"--- EDITH CORE ONLINE (Python Flask) ---")
-    print(f"--- Accès Local : http://127.0.0.1:3000 ---")
-    print(f"--- Accès Réseau/Mobile : http://{local_ip}:3000 ---")
-    app.run(host='0.0.0.0', port=3000, debug=False)
+    print(f"--- Accès Local : http://127.0.0.1:{port} ---")
+    print(f"--- Accès Réseau : http://{local_ip}:{port} ---")
+    app.run(host='0.0.0.0', port=port, debug=False)
