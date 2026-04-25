@@ -565,21 +565,23 @@ def chat():
     # Fallback to HuggingFace (FREE)
     if HUGGINGFACE_API_KEY and len(HUGGINGFACE_API_KEY) > 10:
         try:
-            # Mistral-7B via Hugging Face Inference API
-            hf_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+            # Phi-3-mini is very fast and free on Hugging Face
+            hf_url = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct"
             response = requests.post(
                 hf_url,
                 headers={"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"},
                 json={
-                    "inputs": f"<s>[INST] {system_content}\n\n{message} [/INST]",
-                    "parameters": {"max_new_tokens": 1000, "temperature": 0.7}
+                    "inputs": f"<|system|>\n{system_content}<|end|>\n<|user|>\n{message}<|end|>\n<|assistant|>",
+                    "parameters": {"max_new_tokens": 800, "temperature": 0.7}
                 },
                 timeout=20
             )
             data_hf = response.json()
             if isinstance(data_hf, list) and "generated_text" in data_hf[0]:
-                reply = data_hf[0]["generated_text"].split("[/INST]")[-1].strip()
+                reply = data_hf[0]["generated_text"].split("<|assistant|>")[-1].strip()
                 return jsonify({"reply": reply, "wiki_source": wiki_result.get("url", "")})
+            elif isinstance(data_hf, dict) and "error" in data_hf:
+                 print(f"[EDITH] HuggingFace Error: {data_hf['error']}")
         except Exception as e:
             print(f"[EDITH] AI Connection error (HuggingFace): {e}")
 
