@@ -159,6 +159,14 @@ def get_user_from_request():
         return jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
     except: return None
 
+@app.route('/api/debug', methods=['GET'])
+def debug_env():
+    return jsonify({
+        "hf_key_detected": bool(HUGGINGFACE_API_KEY and len(HUGGINGFACE_API_KEY) > 10),
+        "openai_key_detected": bool(OPENAI_API_KEY and len(OPENAI_API_KEY) > 10),
+        "ai_url": AI_BASE_URL
+    })
+
 # --- Routes ---
 
 
