@@ -33,11 +33,10 @@ CORS(app)
 
 # Configuration
 SECRET_KEY = os.getenv("JWT_SECRET", "edith-c-tech-super-secret-key")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ADMIN_ACCESS_KEY = os.getenv("ADMIN_ACCESS_KEY", "Edith@2026")  # clé secrète admin
-
-# Configuration OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+# Configuration IA
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "")
+ADMIN_ACCESS_KEY = os.getenv("ADMIN_ACCESS_KEY", "Edith@2026")  # clé secrète admin
 AI_BASE_URL = os.getenv("AI_BASE_URL", "https://api.openai.com/v1/chat/completions")
 # Si la clé contient "nebius", on adapte l'URL automatiquement si elle n'est pas déjà définie
 if OPENAI_API_KEY and "nebius" in OPENAI_API_KEY.lower() and "openai.com" in AI_BASE_URL:
