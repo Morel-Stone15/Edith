@@ -10,33 +10,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install Bubblewrap
-        run: npm install -g @bubblewrap/cli
-
-      - name: Wake up Render Server
-        run: curl -s https://edith-66y1.onrender.com/manifest.json > /dev/null
-
       - name: Build APK
-        run: |
-          mkdir -p ~/.bubblewrap
-          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
-          bubblewrap init --manifest manifest.json --no-interaction
-          
-          # Generate a dummy keystore
-          keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
-          
-          bubblewrap build --no-interaction --ignore-signing
+        uses: is-it-ayush/pwa-to-apk@v1
+        with:
+          # Your PWA URL
+          url: "https://edith-66y1.onrender.com"
+          # (Optional) The name of the generated APK
+          name: "EDITH"
+          # (Optional) The package ID
+          package-id: "com.edith.istctech"
+          # (Optional) Display mode
+          display: "standalone"
+          # (Optional) Orientation
+          orientation: "any"
+          # (Optional) Status bar color
+          theme-color: "#050a14"
+          # (Optional) Background color
+          background-color: "#050a14"
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
