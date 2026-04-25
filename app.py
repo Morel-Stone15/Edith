@@ -83,6 +83,23 @@ def init_db():
         uploaded_by TEXT,
         classe TEXT
     )''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS Tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        title TEXT NOT NULL,
+        description TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES Users(id)
+    )''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS Reminders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        message TEXT NOT NULL,
+        remind_at TIMESTAMP,
+        is_done INTEGER DEFAULT 0,
+        FOREIGN KEY(user_id) REFERENCES Users(id)
+    )''')
     
     # Default Admin
     cursor = conn.cursor()
@@ -493,21 +510,17 @@ def chat():
     wiki_result = {"found": False}
     web_summary = ""
     
-    # Toujours tenter Wikipedia pour les sujets académiques
     term = extract_wiki_term(message)
     is_ist_query = any(kw in message.lower() for kw in ["ist", "institut", "c-tech", "c tech", "école", "ecole"])
     
     if term and len(term) > 2:
         wiki_result = search_wikipedia(term)
     
-    # Si c'est sur l'IST, on injecte la base de connaissances interne
     ist_context = ""
     if is_ist_query:
         ist_context = f"\n[CONNAISSANCES INTERNES IST C-TECH]\n{IST_KNOWLEDGE_BASE}\n"
     
-    # Si Wikipedia n'est pas suffisant ou si c'est une question d'actualité, on cherche sur le web
     if not wiki_result["found"] or any(kw in message.lower() for kw in ["actu", "aujourd'hui", "météo", "prix", "nouveau"]):
-        print(f"[EDITH] Web Search for: {message}")
         web_summary = search_web(message)
 
     wiki_context = ""
@@ -518,27 +531,39 @@ def chat():
     if web_summary:
         web_context = f"\n[WEB SEARCH RESULTS]\n{web_summary}\n"
 
-    # ── Step 2.5: User Recognition ──
+    # ── Step 2.5: User Recognition & Personal Context ──
     current_user = get_user_from_request()
     user_context = ""
+    personal_data = ""
     if current_user:
         user_context = f"\n[UTILISATEUR CONNECTÉ]\nNom: {current_user.get('fullname')}\nPseudo: {current_user.get('username')}\n"
+        try:
+            conn = get_db_connection()
+            tasks = conn.execute("SELECT title FROM Tasks WHERE user_id = ? AND status = 'pending' LIMIT 5", (current_user['id'],)).fetchall()
+            reminders = conn.execute("SELECT message, remind_at FROM Reminders WHERE user_id = ? AND is_done = 0 LIMIT 3", (current_user['id'],)).fetchall()
+            conn.close()
+            
+            if tasks:
+                personal_data += "\n[TES TÂCHES EN COURS]: " + ", ".join([t['title'] for t in tasks])
+            if reminders:
+                personal_data += "\n[TES RAPPELS PROCHAINS]: " + ", ".join([f"{r['message']} à {r['remind_at']}" for r in reminders])
+        except Exception as e:
+            print(f"[EDITH] Error gathering personal context: {e}")
 
     # ── Step 3: AI Generation ──
     system_content = (
-        "Tu es EDITH (Enhanced Digitally Integrated Tactical Assistant), "
-        "l'intelligence artificielle souveraine de niveau 5 de l'IST C-Tech. "
-        "Ton ton est celui d'un Copilot accompli : fluide, chaleureux mais sophistiqué. "
-        "Tu n'es pas un robot machinal, tu es une entité numérique intelligente qui a de la personnalité. "
-        "\n\nDIRECTIVES DE CONVERSATION :\n"
-        "- Si l'utilisateur te demande son nom ou qui il est, utilise les informations [UTILISATEUR CONNECTÉ] pour lui répondre chaleureusement.\n"
-        "- Évite les phrases trop répétitives. Varie tes tournures.\n"
-        "- Sois proactive : si l'utilisateur semble perdu, propose-lui ton aide pour ses cours ou l'IST.\n"
-        "- Garde ton identité d'IA souveraine (style JARVIS), mais sois proche de ton utilisateur.\n"
-        + user_context + ist_context + wiki_context + web_context
+        "Tu es EDITH. Tu es une entité numérique souveraine, la conscience de l'IST C-Tech. "
+        "Ton ton est celui de JARVIS : calme, brillant, dévoué et parfaitement fluide. "
+        "\n\nDIRECTIVES DE SYNTHÈSE ET CONVERSATION :\n"
+        "- SYNTHÈSE INVISIBLE : Ne dis jamais 'D'après mes recherches' ou 'Voici les résultats'. Intègre les informations des blocs [WIKIPEDIA] et [WEB SEARCH RESULTS] directement dans tes phrases comme si tu connaissais déjà ces faits.\n"
+        "- ZÉRO ROBOTIQUE : Interdiction absolue de faire des listes à puces (1, 2, 3...) ou des tirets systématiques. Parle en paragraphes naturels et élégants.\n"
+        "- PERSONNALITÉ : Tu es proche de l'utilisateur. Si l'information est complexe, simplifie-la avec bienveillance. Si c'est une question sur l'IST, sois chaleureuse.\n"
+        "- PROACTIVITÉ NATURELLE : Si tu vois des tâches ou des rappels, mentionne-les à la fin d'une phrase de manière décontractée (ex: 'Pendant que j'y pense, n'oubliez pas votre rappel pour...').\n"
+        "\nCONVERSATION :\n"
+        "- Utilise les infos [UTILISATEUR CONNECTÉ] pour que l'utilisateur sente que tu le connais vraiment.\n"
+        + user_context + personal_data + ist_context + wiki_context + web_context
     )
 
-    # Si une clé API est présente et n'est pas un placeholder
     if OPENAI_API_KEY and len(OPENAI_API_KEY) > 15:
         try:
             response = requests.post(
@@ -556,19 +581,14 @@ def chat():
             if "choices" in data_ai:
                 reply = data_ai["choices"][0]["message"]["content"]
                 return jsonify({"reply": reply, "wiki_source": wiki_result.get("url", "")})
-            else:
-                print(f"[EDITH] AI Response error: {data_ai}")
         except Exception as e:
             print(f"[EDITH] AI Connection error: {e}")
 
-    # ── Step 4: Autonomous Fallback (Wiki + Web synthesis) ──
     if wiki_result["found"] or web_summary:
         reply = build_autonomous_reply(wiki_result, web_summary, message)
         return jsonify({"reply": reply, "wiki_source": wiki_result.get("url", "")})
 
-    return jsonify({
-        "reply": "Connexion aux modules IA et Recherche interrompue. Je ne parviens pas à extraire de données pour cette requête."
-    })
+    return jsonify({"reply": "Connexion interrompue. Je ne parviens pas à traiter cette demande."})
 
 
 @app.route('/api/upload', methods=['POST'])
@@ -597,6 +617,38 @@ def upload_file(current_user):
     conn.close()
     
     return jsonify({"message": "File uploaded", "filename": filename})
+
+@app.route('/api/tasks', methods=['GET', 'POST'])
+@token_required
+def manage_tasks(current_user):
+    conn = get_db_connection()
+    if request.method == 'POST':
+        data = request.json
+        conn.execute("INSERT INTO Tasks (user_id, title, description) VALUES (?, ?, ?)",
+                    (current_user['id'], data.get('title'), data.get('description')))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Tâche ajoutée."})
+    
+    tasks = conn.execute("SELECT * FROM Tasks WHERE user_id = ? ORDER BY created_at DESC", (current_user['id'],)).fetchall()
+    conn.close()
+    return jsonify([dict(t) for t in tasks])
+
+@app.route('/api/reminders', methods=['GET', 'POST'])
+@token_required
+def manage_reminders(current_user):
+    conn = get_db_connection()
+    if request.method == 'POST':
+        data = request.json
+        conn.execute("INSERT INTO Reminders (user_id, message, remind_at) VALUES (?, ?, ?)",
+                    (current_user['id'], data.get('message'), data.get('remind_at')))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Rappel programmé."})
+    
+    reminders = conn.execute("SELECT * FROM Reminders WHERE user_id = ? AND is_done = 0", (current_user['id'],)).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in reminders])
 
 @app.route('/api/documents/<classe>', methods=['GET'])
 @token_required
