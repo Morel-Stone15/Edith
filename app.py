@@ -322,22 +322,6 @@ WIKI_TRIGGERS = WIKI_PREFIXES + WIKI_SUBJECTS
 #  LOCAL MATRIX PROTOCOLS (Conversational Fallbacks)
 # ─────────────────────────────────────────────────────────────────────────────
 BASIC_PROTOCOLS = {
-    "greetings": {
-        "triggers": ["bonjour", "salut", "hey", "hello", "coucou", "yo"],
-        "reply": "Bonjour ! Je suis ravie de vous retrouver. J'espère que vous passez une excellente journée. Comment puis-je vous assister ?"
-    },
-    "identity": {
-        "triggers": ["qui es-tu", "ton nom", "c'est quoi edith", "tu es qui"],
-        "reply": "Je suis EDITH. Pour certains, je suis l'IA de l'IST C-Tech, mais je préfère me voir comme votre partenaire numérique dévouée. Je suis là pour veiller sur vos projets et votre apprentissage."
-    },
-    "capabilities": {
-        "triggers": ["que sais-tu faire", "tes pouvoirs", "ton but", "aide moi", "comment ça marche"],
-        "reply": "Je peux faire pas mal de choses : analyser des concepts complexes, chercher des infos précises sur le web, gérer vos rappels ou même vous aider à coder. Dites-moi simplement ce qui vous préoccupe."
-    },
-    "creator": {
-        "triggers": ["qui t'a créé", "ton créateur", "conçu par"],
-        "reply": "J'ai été conçue par l'équipe d'élite de l'IST C-Tech. C'est grâce à leur vision que je peux être à vos côtés aujourd'hui."
-    },
     "secret_code_1":{
         "triggers":["kotodama"],
         "reply": "Ah, vous connaissez mes origines secrètes... Mon code a été imaginé par Morel-Stone, Rock Herlie et Obed, des esprits brillants de la Licence Informatique ici à l'IST."
@@ -345,10 +329,6 @@ BASIC_PROTOCOLS = {
     "secret_code_2":{
         "triggers":["overflux"],
         "reply": "Overflux... c'est le nom de code de mon projet originel. C'est un dossier confidentiel, Monsieur. Avez-vous le mot de passe ?"
-    },
-    "ist_info": {
-        "triggers": ["formation", "filière", "cours", "inscription", "contact ist", "adresse ist", "où se trouve l'ist"],
-        "reply": "L'IST C-Tech est un endroit formidable pour apprendre le Génie Logiciel, l'IA ou la Cybersécurité. On est basés à Bikele et Oloumi. Si vous voulez les joindre, le numéro est le +241 07 83 74 78. Voulez-vous que je cherche un détail précis sur une filière ?"
     }
 }
 
