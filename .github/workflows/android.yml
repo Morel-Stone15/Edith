@@ -24,6 +24,12 @@ jobs:
       - name: Install Bubblewrap
         run: npm install -g @bubblewrap/cli
 
+      - name: Wake up Render Server (with retries)
+        run: |
+          for i in {1..5}; do
+            curl -s -I https://edith-66y1.onrender.com/manifest.json && break || sleep 15
+          done
+
       - name: Build APK
         run: |
           # 1. Configuration forcée des chemins
