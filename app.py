@@ -482,10 +482,15 @@ def chat():
     wiki_result = {"found": False}
     web_summary = ""
     
+    # Mots interdits pour Wikipedia (pour éviter les réponses bizarres sur "Salut", etc.)
+    greetings_words = ["salut", "bonjour", "hello", "hey", "ça va", "ca va", "test", "cv"]
+    
     term = extract_wiki_term(message)
     is_ist_query = any(kw in message.lower() for kw in ["ist", "institut", "c-tech", "c tech", "école", "ecole"])
+    is_greeting = any(gw == message.lower().strip() for gw in greetings_words)
     
-    if term and len(term) > 2:
+    # On ne cherche sur Wiki que si ce n'est pas un simple bonjour et que le terme est sérieux
+    if term and len(term) > 2 and not is_greeting:
         wiki_result = search_wikipedia(term)
     
     ist_context = ""
@@ -559,7 +564,11 @@ def chat():
         reply = build_autonomous_reply(wiki_result, web_summary, message)
         return jsonify({"reply": reply, "wiki_source": wiki_result.get("url", "")})
 
-    return jsonify({"reply": "Connexion interrompue. Je ne parviens pas à traiter cette demande."})
+    # Si rien n'est trouvé et pas d'IA, on donne une réponse humaine simple au lieu d'une erreur
+    if is_greeting:
+        return jsonify({"reply": "Bonjour ! Mes modules avancés sont en veille, mais je suis là. Comment puis-je vous aider avec mes fonctions de base ?"})
+
+    return jsonify({"reply": "Je suis en mode restreint actuellement. Mes systèmes ne parviennent pas à analyser cette demande complexe sans connexion à mon noyau IA."})
 
 
 @app.route('/api/upload', methods=['POST'])
