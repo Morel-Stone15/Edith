@@ -22,7 +22,7 @@ echo Accès local  : http://127.0.0.1:3000
 echo Accès Mobile : http://192.168.1.77:3000 (Vérifiez votre IP avec ipconfig)
 echo.
 
-%VENV_PYTHON% server.py
+%VENV_PYTHON% app.py
 
 echo.
 echo [INFO] Serveur arrêté.
