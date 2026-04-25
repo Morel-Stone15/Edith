@@ -10,23 +10,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build APK
-        uses: is-it-ayush/pwa-to-apk@v1
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          # Your PWA URL
-          url: "https://edith-66y1.onrender.com"
-          # (Optional) The name of the generated APK
-          name: "EDITH"
-          # (Optional) The package ID
-          package-id: "com.edith.istctech"
-          # (Optional) Display mode
-          display: "standalone"
-          # (Optional) Orientation
-          orientation: "any"
-          # (Optional) Status bar color
-          theme-color: "#050a14"
-          # (Optional) Background color
-          background-color: "#050a14"
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Build APK
+        run: |
+          # 1. Configuration forcée des chemins
+          mkdir -p ~/.bubblewrap
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
+          
+          # 2. Initialisation avec URL absolue
+          bubblewrap init --manifest="https://edith-66y1.onrender.com/manifest.json" --no-interaction
+          
+          # 3. Création du keystore
+          keytool -genkey -v -keystore edith.keystore -alias edith -keyalg RSA -keysize 2048 -validity 10000 -storepass edith@2026 -keypass edith@2026 -dname "CN=EDITH, OU=IST, O=CTech, L=Libreville, S=Gabon, C=GA"
+          
+          # 4. Build final
+          bubblewrap build --no-interaction --ignore-signing
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
